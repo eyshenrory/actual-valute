@@ -1,1 +1,7 @@
-tests
+tests/
+.env
+venv/
+__pycache__/
+logs/
+config/
+*.pyc

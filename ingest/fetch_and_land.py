@@ -11,7 +11,7 @@ def fetch_and_land():
         data = response.json()
 
         conn = psycopg2.connect(
-            host="localhost",
+            host="valute-postgres",
             dbname="valute",
             user="admin",
             password="admin",
