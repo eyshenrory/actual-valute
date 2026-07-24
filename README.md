@@ -37,11 +37,11 @@ flowchart LR
 ## Технологии
 
 - **Python** — `requests`, `psycopg2`
-- **PostgreSQL 18** — хранение данных
-- **Apache Airflow 3.3** — оркестрация
+- **PostgreSQL** — хранение данных
+- **Apache Airflow** — оркестрация
 - **Docker Compose** — контейнеризация
 - **pytest** — тесты 
-- **GitHub Actions** — автоматический запуск тестов при каждом push и pull
+- **GitHub Actions** — автоматический запуск тестов при каждом push
 
 
 ## Установка и запуск
