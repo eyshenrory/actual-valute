@@ -1,3 +1,4 @@
+import logging
 import os
 from urllib.parse import urlparse
 
@@ -5,6 +6,12 @@ import psycopg2
 import psycopg2.extras
 import requests
 
+logging.basicConfig(
+    level=logging.INFO, 
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+   
+logger = logging.getLogger(__name__)
 
 def fetch_and_land():
     conn = None
@@ -12,6 +19,7 @@ def fetch_and_land():
         conn_uri = os.environ["AIRFLOW_CONN_VALUTE_POSTGRES"]
         parsed = urlparse(conn_uri)
 
+        logger.info("Fetching rates from CBR API")
         response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js")
         response.raise_for_status()
         data = response.json()
@@ -29,9 +37,10 @@ def fetch_and_land():
             [psycopg2.extras.Json(data)]
         )
         conn.commit()
+        logger.info("Landed raw payload, %d currencies", len(data.get("Valute", {})))
         cur.close()
-    except Exception as e:
-        print(f"Ingest failed: {e}")
+    except Exception:
+        logger.exception("Ingest failed")
         if conn:
             conn.rollback()
         raise
