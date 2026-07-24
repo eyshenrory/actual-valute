@@ -1,4 +1,4 @@
-# Valute Pipeline
+# Actual Valute
 
 ![Tests](https://github.com/eyshenrory/actual-valute/actions/workflows/test.yaml/badge.svg)
 
