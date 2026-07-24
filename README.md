@@ -70,15 +70,7 @@ flowchart LR
 4. **Airflow** на [http://localhost:8080](http://localhost:8080)
    (логин `airflow` / пароль `airflow`) Запускается ежедневно в 12:00 по МСК.
 
-## Проверка результата
-
-```bash
-docker exec -it valute_postgres psql -U admin -d valute
 ```
-```sql
-SELECT rate_date, COUNT(*) FROM staging_rates GROUP BY rate_date ORDER BY rate_date;
-```
-
 ## Тесты
 
 ```bash
@@ -91,3 +83,9 @@ pytest
 Задача `guard` завершает DAG с ошибкой, если для последней даты выполняется любое из условий:
 - Меньше 40 валютных строк за последнюю доступную дату
 - Последняя дата (`rate_date`) устарела более чем на 3 дня
+
+## Пример результата
+
+![USD/RUB](serve/usd_trend.png)
+
+График строится скриптом `serve/plot_rates.py` по данным, собранным пайплайном.
