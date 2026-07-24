@@ -7,17 +7,28 @@
 проверкой данных.
 
 ## Архитектура
+```mermaid
+flowchart LR
+    A[CBR API] -->|requests| B[ingest]
+    B --> C[(raw_daily_rates)]
+    C -->|SQL transform| D[(staging_rates)]
+    D --> E{guard}
+    E -->|pass| F[Queryable data]
+    E -->|fail| G[DAG fails]
 
-```
-CBR API  →  ingest  →  land  →  transform  →  guard
-                       (raw)    (staging)    (checks)
+    subgraph Airflow DAG
+        B
+        C
+        D
+        E
+    end
 ```
 
 | Этап        | Процесс                                                                | Расположение                         |
 |-------------|---------------------------------------------------------------------------|-----------------------------------|
 | Ingest      | Получение курсов валют за день с API ЦБ РФ                               | `ingest/fetch_and_land.py`        |
 | Land        | Сохранение ответа в виде JSON-строки                                     | таблица `raw_daily_rates`         |
-| Transform   | Разбор JSON в типизированные построчные данные по каждой валюте          | `transform/staging_rates.sql`     |
+| Transform   | Разбор JSON в таблицу `staging_rates`                                    | `transform/staging_rates.sql`     |
 | Guard       | Явный отказ, если данных мало или они устарели                           | `sql/guard_check.sql`             |
 | Orchestrate | Ежедневный запуск ingest → transform → guard                             | DAG Airflow (`dags/valute_pipeline.py`) |
 
