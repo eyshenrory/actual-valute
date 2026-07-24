@@ -1,3 +1,6 @@
+import os
+from urllib.parse import urlparse
+
 import psycopg2
 import psycopg2.extras
 import requests
@@ -6,16 +9,19 @@ import requests
 def fetch_and_land():
     conn = None
     try:
+        conn_uri = os.environ["AIRFLOW_CONN_VALUTE_POSTGRES"]
+        parsed = urlparse(conn_uri)
+
         response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js")
         response.raise_for_status()
         data = response.json()
 
         conn = psycopg2.connect(
-            host="valute-postgres",
-            dbname="valute",
-            user="admin",
-            password="admin",
-            port=5432
+            host=parsed.hostname,
+            dbname=parsed.path.lstrip("/"),
+            user=parsed.username,
+            password=parsed.password,
+            port=parsed.port or 5432
         )
         cur = conn.cursor()
         cur.execute(
