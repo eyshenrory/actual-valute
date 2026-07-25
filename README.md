@@ -12,16 +12,23 @@
 flowchart LR
     A[CBR API] -->|requests| B[ingest]
     B --> C[(raw_daily_rates)]
-    C -->|SQL transform| D[(staging_rates)]
-    D --> E{guard}
-    E -->|pass| F[Queryable data]
-    E -->|fail| G[DAG fails]
-
+    C -->|transform| D[(staging_rates)]
+    D -->|marts| E[(dim_currency)]
+    F[(dim_date)] --> G
+    D -->|marts| G[(fct_daily_rates)]
+    E --> G
+    G --> H{guard}
+    H -->|pass| I[Queryable star schema]
+    H -->|fail| J[DAG fails]
+ 
     subgraph Airflow DAG
         B
         C
         D
         E
+        F
+        G
+        H
     end
 ```
 
@@ -30,9 +37,11 @@ flowchart LR
 | Ingest      | Получение курсов валют за день с API ЦБ РФ                               | `ingest/fetch_and_land.py`        |
 | Land        | Сохранение ответа в виде JSON-строки                                     | таблица `raw_daily_rates`         |
 | Transform   | Разбор JSON в таблицу `staging_rates`                                    | `transform/staging_rates.sql`     |
+| Marts        | Построение схемы "Звезда"                                               | `transform/marts.sql` |
 | Guard       | Явный отказ, если данных мало или они устарели                           | `sql/guard_check.sql`             |
 | Orchestrate | Ежедневный запуск ingest → transform → guard                             | DAG Airflow (`dags/valute_pipeline.py`) |
 
+Слой marts реализован в виде схемы "Звезда": две таблицы измерений и таблица фактов.
 
 ## Технологии
 
