@@ -19,7 +19,9 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 with open("serve/usd_trend.sql") as f:
-    cur.execute(f.read())
+    char_code = os.environ.get("CURRENCY", "USD")
+    cur.execute(f.read(), (char_code,))
+
 rows = cur.fetchall()
 dates = [r[0] for r in rows]
 values = [r[1] for r in rows]
@@ -27,7 +29,7 @@ cur.close()
 conn.close()
 
 plt.plot(dates, values, marker="o")
-plt.title("USD / RUB")
+plt.title(f"{char_code} / RUB")
 plt.xlabel("Date")
 plt.ylabel("Rate")
 plt.grid(True)
