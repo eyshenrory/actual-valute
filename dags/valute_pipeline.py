@@ -19,6 +19,11 @@ from airflow.sdk import dag, task
     template_searchpath=["/opt/airflow/valute"],
 )
 def ProcessValute():
+    create_tables = SQLExecuteQueryOperator(
+        task_id="create_tables",
+        conn_id="valute_postgres",
+        sql="sql/create_tables.sql",
+    )
     ingest = BashOperator(
         task_id="ingest",
         bash_command="python /opt/airflow/valute/ingest/fetch_and_land.py"
@@ -45,5 +50,5 @@ def ProcessValute():
         conn.close()
         if pipeline_failed:
             raise ValueError("Guard check failed: row count too low or data is stale")
-    ingest >> transform >> marts >> guard()
+    create_tables >> ingest >> transform >> marts >> guard()
 dag = ProcessValute()
