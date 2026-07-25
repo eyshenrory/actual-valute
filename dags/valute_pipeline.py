@@ -28,6 +28,11 @@ def ProcessValute():
         conn_id="valute_postgres",
         sql="transform/staging_rates.sql",
     )
+    marts = SQLExecuteQueryOperator(
+        task_id="marts",
+        conn_id="valute_postgres",
+        sql="transform/marts.sql",
+    )
     @task
     def guard():
         hook = PostgresHook(postgres_conn_id="valute_postgres")
@@ -40,5 +45,5 @@ def ProcessValute():
         conn.close()
         if pipeline_failed:
             raise ValueError("Guard check failed: row count too low or data is stale")
-    ingest >> transform >> guard()
+    ingest >> transform >> marts >> guard()
 dag = ProcessValute()
