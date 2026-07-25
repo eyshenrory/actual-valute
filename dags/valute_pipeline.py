@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pendulum
 from airflow.operators.bash import BashOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
@@ -7,8 +9,10 @@ from airflow.sdk import dag, task
 
 @dag(
     dag_id="valute_pipeline",
-    schedule="0 12 * * *",
     start_date=pendulum.datetime(2026, 7, 1, tz="Europe/Moscow"),
+    schedule="0 12 * * *",
+    retries=3,
+    retry_delay=timedelta(minutes=60),
     catchup=False,
     template_searchpath=["/opt/airflow/valute"],
 )
