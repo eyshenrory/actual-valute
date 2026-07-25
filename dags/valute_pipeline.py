@@ -11,8 +11,10 @@ from airflow.sdk import dag, task
     dag_id="valute_pipeline",
     start_date=pendulum.datetime(2026, 7, 1, tz="Europe/Moscow"),
     schedule="0 12 * * *",
-    retries=3,
-    retry_delay=timedelta(minutes=60),
+    default_args = {
+        "retries": 3,
+        "retry_delay": timedelta(minutes=60),
+    },
     catchup=False,
     template_searchpath=["/opt/airflow/valute"],
 )
