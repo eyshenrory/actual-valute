@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS dim_currency (
   cbr_id TEXT NOT NULL UNIQUE,
   num_code TEXT,
   char_code TEXT NOT NULL UNIQUE,
-  nominal INT NOT NULL,
   name TEXT
 );
 
@@ -37,6 +36,7 @@ CREATE TABLE IF NOT EXISTS fct_daily_rates (
   currency_key INT REFERENCES dim_currency(currency_key),
   value NUMERIC NOT NULL,
   previous NUMERIC,
+  nominal INT NOT NULL,
   rate_per_unit NUMERIC, 
   PRIMARY KEY (date_key, currency_key)
 );
