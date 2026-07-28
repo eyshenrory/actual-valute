@@ -6,3 +6,4 @@ config/
 *.pyc
 valute_dbt/target/
 valute_dbt/dbt_packages/
+valute_dbt/.user.yml
