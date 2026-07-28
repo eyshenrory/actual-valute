@@ -4,3 +4,5 @@ __pycache__/
 logs/
 config/
 *.pyc
+valute_dbt/target/
+valute_dbt/dbt_packages/

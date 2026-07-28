@@ -5,7 +5,7 @@ SELECT DISTINCT ON (kv.value ->> 'ID')
     kv.value ->> 'CharCode' AS char_code,
     kv.value ->> 'Name' AS name
 FROM raw_daily_rates, jsonb_each(payload -> 'Valute') AS kv(key, value)
-ORDER BY kv.value ->> 'ID', raw_daily_rates.id DESC
+ORDER BY kv.value ->> 'ID', raw_daily_rates.rate_date DESC
 ON CONFLICT (cbr_id) DO UPDATE SET 
     num_code = EXCLUDED.num_code,
     char_code = EXCLUDED.char_code,
@@ -18,7 +18,7 @@ SELECT
     EXTRACT(YEAR FROM g.d)::int, EXTRACT(MONTH FROM g.d)::int, EXTRACT(DAY FROM g.d)::int, 
     EXTRACT(ISODOW FROM g.d)::int,
     EXTRACT(ISODOW FROM g.d)::int >= 6
-FROM generate_series('2025-01-01'::date, '2035-12-31'::date, '1 day'::interval) AS g(d)
+FROM generate_series('2020-01-01'::date, '2030-12-31'::date, '1 day'::interval) AS g(d)
 ON CONFLICT (date_key) DO NOTHING;
 
 INSERT INTO fct_daily_rates (date_key, currency_key, value, previous, nominal, rate_per_unit)
@@ -32,7 +32,7 @@ SELECT
 FROM staging_rates sr
 JOIN dim_currency dc ON dc.char_code = sr.char_code
 JOIN dim_date   dd ON dd.full_date  = sr.rate_date
---WHERE sr.rate_date >= CURRENT_DATE - INTERVAL '7 days'
+-- WHERE sr.rate_date >= CURRENT_DATE - INTERVAL '3 days'
 ON CONFLICT (date_key, currency_key) DO UPDATE SET
     value         = EXCLUDED.value,
     previous      = EXCLUDED.previous,

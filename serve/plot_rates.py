@@ -28,7 +28,7 @@ values = [r[1] for r in rows]
 cur.close()
 conn.close()
 
-plt.plot(dates, values, marker="o")
+plt.plot(dates, values)
 plt.title(f"{char_code} / RUB")
 plt.xlabel("Date")
 plt.ylabel("Rate")

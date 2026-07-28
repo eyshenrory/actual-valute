@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: dim_currency
+    columns:
+      - name: char_code
+        tests:
+          - unique
+          - not_null
+      
+  - name: fct_daily_rates
+    columns:
+      - name: rate_date
+        tests:
+          - not_null
+      - name: char_code
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_currency')
+                field: char_code
+      - name: value
+        tests:
+          - not_null

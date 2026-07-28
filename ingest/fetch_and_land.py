@@ -33,8 +33,9 @@ def fetch_and_land():
         )
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO raw_daily_rates (payload) VALUES (%s)",
-            [psycopg2.extras.Json(data)]
+            "INSERT INTO raw_daily_rates (rate_date, payload) VALUES (%s, %s) "
+            "ON CONFLICT (rate_date) DO UPDATE SET payload = EXCLUDED.payload",
+            [data["Date"], psycopg2.extras.Json(data)]
         )
         conn.commit()
         logger.info("Landed raw payload, %d currencies", len(data.get("Valute", {})))
