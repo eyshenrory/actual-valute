@@ -1,0 +1,12 @@
+valute_dbt:
+  outputs:
+    dev:
+      dbname: valute
+      host: "{{ env_var('VALUTE_DB_HOST', 'localhost') }}"
+      pass: "{{ env_var('VALUTE_DB_PASSWORD', 'admin') }}"
+      port: 5432
+      schema: public
+      threads: 4
+      type: postgres
+      user: admin
+  target: dev
