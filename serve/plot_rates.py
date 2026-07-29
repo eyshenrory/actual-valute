@@ -18,7 +18,7 @@ conn = psycopg2.connect(
     port=parsed.port or 5432
 )
 cur = conn.cursor()
-with open("serve/usd_trend.sql") as f:
+with open("serve/trend.sql") as f:
     char_code = os.environ.get("CURRENCY", "USD")
     cur.execute(f.read(), (char_code,))
 
@@ -33,6 +33,6 @@ plt.title(f"{char_code} / RUB")
 plt.xlabel("Date")
 plt.ylabel("Rate")
 plt.grid(True)
-plt.xticks(rotation=45, ha="right")
+plt.gcf().autofmt_xdate()
 plt.tight_layout()
-plt.savefig("serve/usd_trend.png")
+plt.savefig(f"serve/{char_code.lower()}_trend.png")
