@@ -2,18 +2,55 @@ version: 2
 
 models:
   - name: dim_currency
+    description: >
+      Справочник валют. SCD Type 1 — хранится только текущее состояние,
+      история изменений атрибутов не ведётся.
     columns:
+      - name: cbr_id
+        description: "Внутренний идентификатор валюты в системе ЦБ РФ."
       - name: char_code
+        description: >
+          Буквенный код валюты. Используется как ключ соединения
+          с таблицей фактов вместо суррогатного ключа.
         tests:
           - unique
           - not_null
-      
+      - name: num_code
+        description: "Цифровой код валюты по ISO 4217."
+      - name: name
+        description: "Название валюты на русском языке."
+
+  - name: dim_date
+    description: >
+      Календарное измерение, 2020–2030. Генерируется из `generate_series`,
+      не зависит от источника.
+    columns:
+      - name: full_date
+        description: "Календарная дата. Натуральный ключ измерения."
+      - name: year
+        description: "Год."
+      - name: month
+        description: "Месяц."
+      - name: day
+        description: "День месяца."
+      - name: day_of_week
+        description: "День недели по ISO: понедельник — 1, воскресенье — 7."
+      - name: is_weekend
+        description: "1 - если суббота или воскресенье, 0 - в остальных случаях."
+
   - name: fct_daily_rates
+    description: >
+      Таблица фактов: курсы валют ЦБ РФ.
+      Гранулярность — одна валюта на одну дату.
+      Соединяется с измерениями по натуральным ключам `char_code`
+      и `full_date`; суррогатные ключи не используются.
     columns:
       - name: rate_date
+        description: "Дата курса. Соединяется с `dim_date.full_date`."
         tests:
           - not_null
       - name: char_code
+        description: "Код валюты. Соединяется с `dim_currency.char_code`."
         tests:
           - not_null
           - relationships:
@@ -21,5 +58,15 @@ models:
                 to: ref('dim_currency')
                 field: char_code
       - name: value
+        description: "Курс в рублях за `nominal` единиц валюты."
         tests:
           - not_null
+      - name: previous
+        description: "Курс за предыдущую дату публикации."
+      - name: nominal
+        description: >
+          Количество единиц валюты на дату курса.
+      - name: rate_per_unit
+        description: >
+          `value / nominal` — курс за одну единицу валюты.
+          Делает курсы разных валют сопоставимыми на одном графике.

@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_cbr__rates
+    description: >
+      Курсы ЦБ РФ, распакованные из сырого JSON.
+      Гранулярность: одна валюта на одну дату публикации.
+      Инкрементальная модель: при каждом запуске пересчитываются последние
+      3 дня, чтобы подхватить возможные исправления курсов на стороне ЦБ.
+    columns:
+      - name: rate_date
+        description: "Дата, на которую ЦБ РФ установил курс."
+      - name: cbr_id
+        description: "Внутренний идентификатор валюты в системе ЦБ РФ."
+      - name: char_code
+        description: "Буквенный код валюты по ISO 4217."
+      - name: num_code
+        description: "Цифровой код валюты по ISO 4217."
+      - name: name
+        description: "Название валюты на русском языке."
+      - name: nominal
+        description: >
+          Количество единиц валюты, за которое указан курс.
+      - name: value
+        description: "Курс в рублях за `nominal` единиц валюты."
+      - name: previous
+        description: "Курс за предыдущую дату публикации."

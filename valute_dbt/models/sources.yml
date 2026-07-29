@@ -2,6 +2,17 @@ version: 2
 
 sources:
   - name: cbr
+    description: "Данные, загруженные из API ЦБ РФ задачей ingest в Airflow."
     schema: public
     tables:
       - name: raw_daily_rates
+        description: >
+          Сырые ответы API в неизменённом виде.
+          Одна строка на дату публикации.
+        columns:
+          - name: rate_date
+            description: "Дата публикации курсов, извлечённая из ответа."
+          - name: fetched_at
+            description: "Момент загрузки данных пайплайном."
+          - name: payload
+            description: "Полный JSON-ответ API без изменений."

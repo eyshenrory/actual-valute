@@ -1,0 +1,8 @@
+version: 2
+
+data_tests:
+  - name: staging_caught_up
+    description: >
+      Проверяет, что слой staging не отстаёт от сырого слоя:
+      максимальная дата в `stg_cbr__rates` не меньше даты
+      последнего загруженного ответа API.
