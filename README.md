@@ -95,7 +95,6 @@ JSON-ответ от API. Ключ — `rate_date` (натуральный), о�
 3. **Сборка и запуск:**
    ```bash
    docker compose build
-   docker compose up airflow-init
    docker compose up -d
    ```
 
