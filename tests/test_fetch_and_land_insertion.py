@@ -24,4 +24,5 @@ def test_fetch_and_land_insertion(monkeypatch):
         mock_cursor.execute.assert_called_once()
         args, _ = mock_cursor.execute.call_args
         assert "INSERT INTO raw_daily_rates" in args[0]
-        assert args[1][0].adapted == fake_api_response
+        assert args[1][0] == fake_api_response["Date"]
+        assert args[1][1].adapted == fake_api_response
