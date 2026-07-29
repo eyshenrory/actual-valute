@@ -31,7 +31,7 @@ def backfill(start_date=START_DATE, end_date=None):
     try:
         parsed = urlparse(os.environ["AIRFLOW_CONN_VALUTE_POSTGRES"])
         conn = psycopg2.connect(
-            host=parsed.hostname,
+            host=os.environ.get("VALUTE_DB_HOST", parsed.hostname),
             dbname=parsed.path.lstrip("/"),
             user=parsed.username,
             password=parsed.password,

@@ -25,7 +25,7 @@ def fetch_and_land():
         data = response.json()
 
         conn = psycopg2.connect(
-            host=parsed.hostname,
+            host=os.environ.get("VALUTE_DB_HOST", parsed.hostname),
             dbname=parsed.path.lstrip("/"),
             user=parsed.username,
             password=parsed.password,
