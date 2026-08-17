@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: pg
+    schema: valute
+    tables:
+      - name: pg_stg_rates

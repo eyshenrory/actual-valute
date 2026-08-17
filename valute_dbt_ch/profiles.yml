@@ -1,0 +1,12 @@
+valute_dbt_ch:
+  outputs:
+    dev:
+      type: clickhouse
+      host: "{{ env_var('VALUTE_CH_HOST', 'localhost') }}"
+      port: 8123
+      user: admin
+      password: "{{ env_var('VALUTE_CH_PASSWORD', 'admin') }}"
+      schema: valute
+      secure: False
+      threads: 4
+  target: dev

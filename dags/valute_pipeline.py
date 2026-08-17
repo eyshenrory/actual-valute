@@ -23,6 +23,10 @@ def ProcessValute():
         conn_id="valute_postgres",
         sql="sql/create_tables.sql",
     )
+    create_ch_tables = SQLExecuteQueryOperator(
+        task_id="create_ch_tables",
+        sql="sql/create_clickhouse_tables.sql"
+    )
     ingest = BashOperator(
         task_id="ingest",
         bash_command="python /opt/airflow/valute/ingest/fetch_and_land.py",

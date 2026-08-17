@@ -5,5 +5,5 @@ select distinct on (char_code)
     num_code,
     char_code,
     name
-from {{ ref('stg_cbr__rates') }}
+from {{ source('pg', 'pg_stg_rates') }}
 order by char_code, rate_date desc
