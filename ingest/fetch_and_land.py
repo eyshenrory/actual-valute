@@ -13,6 +13,7 @@ logging.basicConfig(
    
 logger = logging.getLogger(__name__)
 
+
 def fetch_and_land():
     conn = None
     try:

@@ -238,7 +238,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-  clickhouse:
+  valute-clickhouse:
       image: clickhouse/clickhouse-server:24.8
       container_name: valute_clickhouse
       environment:
