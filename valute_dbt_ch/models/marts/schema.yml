@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: dim_currency
+    description: "Справочник валют. SCD Type 1 — хранится текущее состояние."
+    columns:
+      - name: char_code
+        description: "Буквенный код валюты. Ключ соединения с таблицей фактов."
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_date
+    description: "Календарное измерение, генерируется из numbers()."
+    columns:
+      - name: full_date
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_daily_rates
+    description: >
+      Таблица фактов: курсы валют.
+      Гранулярность — одна валюта на одну дату.
+    columns:
+      - name: rate_date
+        tests:
+          - not_null
+      - name: char_code
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_currency')
+                field: char_code
+      - name: value
+        tests:
+          - not_null
+      - name: rate_per_unit
+        description: "value / nominal — курс за единицу, сопоставим между валютами."

@@ -30,12 +30,47 @@ def ProcessValute():
     )
     dbt_run = BashOperator(
         task_id="dbt_run",
-        bash_command="cd /opt/airflow/valute/valute_dbt && DBT_PROFILES_DIR=. VALUTE_DB_HOST=valute-postgres dbt run",
+        bash_command="cd /opt/airflow/valute/valute_dbt && "
+        "DBT_PROFILES_DIR=. VALUTE_DB_HOST=valute-postgres dbt run",
     )
     dbt_test = BashOperator(
             task_id="dbt_test",
-            bash_command="cd /opt/airflow/valute/valute_dbt && DBT_PROFILES_DIR=. VALUTE_DB_HOST=valute-postgres dbt test",
+            bash_command="cd /opt/airflow/valute/valute_dbt && "
+            "DBT_PROFILES_DIR=. VALUTE_DB_HOST=valute-postgres dbt test",
             retries=0,
         )
+
+    create_ch_tables = BashOperator(
+        task_id="create_ch_tables",
+        bash_command=(
+            "VALUTE_CH_HOST=valute-clickhouse "
+            "python /opt/airflow/valute/ingest/create_ch_tables.py"
+        ),
+    )
+    load_ch = BashOperator(
+        task_id="load_ch",
+        bash_command=(
+            "VALUTE_CH_HOST=valute-clickhouse "
+            "python /opt/airflow/valute/ingest/load_to_clickhouse.py"
+        ),
+    )
+    dbt_run_ch = BashOperator(
+        task_id="dbt_run_ch",
+        bash_command=(
+            "cd /opt/airflow/valute/valute_dbt_ch && "
+            "DBT_PROFILES_DIR=. VALUTE_CH_HOST=valute-clickhouse dbt run"
+        ),
+    )
+    dbt_test_ch = BashOperator(
+        task_id="dbt_test_ch",
+        bash_command=(
+            "cd /opt/airflow/valute/valute_dbt_ch && "
+            "DBT_PROFILES_DIR=. VALUTE_CH_HOST=valute-clickhouse dbt test"
+        ),
+        retries=0,
+    )
+
     create_tables >> ingest >> dbt_run >> dbt_test
+    dbt_test >> create_ch_tables >> load_ch >> dbt_run_ch >> dbt_test_ch
+
 dag = ProcessValute()
