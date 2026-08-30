@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS valute.pg_stg_rates
     previous Nullable(Decimal(18, 4))
 )
 ENGINE = ReplacingMergeTree
-ORDER BY (rate_date, char_code);
+ORDER BY (char_code, rate_date);

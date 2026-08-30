@@ -1,8 +1,8 @@
 {{ config(
     materialized='incremental',
-    unique_key=['rate_date', 'char_code'],
+    unique_key=['char_code', 'rate_date'],
     incremental_strategy='delete+insert',
-    order_by=['rate_date', 'char_code']
+    order_by=['char_code', 'rate_date']
 ) }}
 
 select
