@@ -35,7 +35,8 @@ def fetch_and_land():
         cur = conn.cursor()
         cur.execute(
             "INSERT INTO raw_daily_rates (rate_date, payload) VALUES (%s, %s) "
-            "ON CONFLICT (rate_date) DO UPDATE SET payload = EXCLUDED.payload",
+            "ON CONFLICT (rate_date) DO UPDATE SET payload = EXCLUDED.payload, fetched_at = now() "
+            "WHERE raw_daily_rates.payload -> 'Valute' IS DISTINCT FROM EXCLUDED.payload -> 'Valute'",
             [data["Date"], psycopg2.extras.Json(data)]
         )
         conn.commit()

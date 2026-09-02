@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 LOAD_WINDOW_DAYS = 3
 
 COLUMNS = [
+    "fetched_at",
     "rate_date",
     "cbr_id",
     "char_code",
@@ -22,7 +23,7 @@ COLUMNS = [
     "name",
     "nominal",
     "value",
-    "previous",
+    "previous"
 ]
 
 SELECT_SQL = f"""

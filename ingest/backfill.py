@@ -21,7 +21,9 @@ COMMIT_EVERY = 50
 
 INSERT_SQL = (
     "INSERT INTO raw_daily_rates (rate_date, payload) VALUES (%s, %s) "
-    "ON CONFLICT (rate_date) DO UPDATE SET payload = EXCLUDED.payload"
+    "ON CONFLICT (rate_date) DO UPDATE SET payload = EXCLUDED.payload, fetched_at = now() "
+    "WHERE raw_daily_rates.payload -> 'Valute' IS DISTINCT FROM EXCLUDED.payload -> 'Valute' "
+    "RETURNING (xmax = 0) AS inserted"
 )
 
 
@@ -39,20 +41,10 @@ def backfill(start_date=START_DATE, end_date=None):
         )
         cur = conn.cursor()
 
-        cur.execute("SELECT rate_date FROM raw_daily_rates")
-        existing = {row[0] for row in cur.fetchall()}
-        logger.info("Already have %d dates", len(existing))
-
-        landed = skipped = missing = 0
+        fetched = inserted = updated = unchanged = missing = 0
         d = start_date
 
         while d <= end_date:
-            if d in existing:
-                skipped += 1
-                logger.info("Skipped %s", d)
-                d += timedelta(days=1)
-                continue
-
             time.sleep(REQUEST_DELAY)
             response = requests.get(ARCHIVE_URL.format(d), timeout=30)
 
@@ -66,17 +58,25 @@ def backfill(start_date=START_DATE, end_date=None):
             data = response.json()
 
             cur.execute(INSERT_SQL, [data["Date"], psycopg2.extras.Json(data)])
-            landed += 1
-            logger.info("Landed %s (%d currencies)", d, len(data.get("Valute", {})))
+            fetched += 1
 
-            if landed % COMMIT_EVERY == 0:
+            if cur.rowcount == 0:
+                unchanged += 1             
+            elif cur.fetchone()[0]:
+                inserted += 1
+                logger.info("Inserted %s (%d currencies)", d, len(data.get("Valute", {})))
+            else:
+                updated += 1
+                logger.info("Updated %s (%d currencies)", d, len(data.get("Valute", {})))
+
+            if fetched % COMMIT_EVERY == 0:
                 conn.commit()
 
             d += timedelta(days=1)
 
         conn.commit()
         cur.close()
-        logger.info("Done: %d landed, %d skipped, %d not published", landed, skipped, missing)
+        logger.info("Done: %d fetched, %d inserted, %d updated, %d unchanged, %d not published", fetched, inserted, updated, unchanged, missing)
 
     except Exception:
         logger.exception("Backfill failed")

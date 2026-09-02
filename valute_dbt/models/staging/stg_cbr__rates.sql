@@ -5,6 +5,7 @@
 }}
 
 select
+    fetched_at,
     rate_date,
     kv.value ->> 'ID' as cbr_id,
     kv.key as char_code,
