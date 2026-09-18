@@ -16,7 +16,7 @@ select
 from {{ source('pg', 'pg_stg_rates') }}
 
 {% if is_incremental() %}
-    where rate_date >= (select max(rate_date) from {{ this }}) - INTERVAL 3 DAY
+where rate_date >= (select max(rate_date) from {{ this }}) - INTERVAL 3 DAY
 {% endif %}
 
 order by fetched_at desc, value desc 
