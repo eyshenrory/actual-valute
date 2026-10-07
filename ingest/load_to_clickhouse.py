@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import date, timedelta
+from datetime import timedelta
 from urllib.parse import urlparse
 
 import clickhouse_connect
@@ -33,11 +33,17 @@ SELECT_SQL = f"""
     ORDER BY rate_date, char_code
 """
 
+MAX_DATE = """
+    SELECT greatest(max(rate_date), toDate('2020-01-01'))
+    FROM pg_stg_rates
+"""
+
 
 def load_to_clickhouse(window_days=LOAD_WINDOW_DAYS):
     pg_conn = None
     try:
         parsed = urlparse(os.environ["AIRFLOW_CONN_VALUTE_POSTGRES"])
+
         pg_conn = psycopg2.connect(
             host=os.environ.get("VALUTE_DB_HOST", parsed.hostname),
             dbname=parsed.path.lstrip("/"),
@@ -46,7 +52,15 @@ def load_to_clickhouse(window_days=LOAD_WINDOW_DAYS):
             port=parsed.port or 5432,
         )
 
-        cutoff = date.today() - timedelta(days=window_days)
+        ch = clickhouse_connect.get_client(
+            host=os.environ.get("VALUTE_CH_HOST", "localhost"),
+            port=int(os.environ.get("VALUTE_CH_PORT", 8123)),
+            username=os.environ.get("VALUTE_CH_USER", "admin"),
+            password=os.environ.get("VALUTE_CH_PASSWORD", "admin"),
+            database="valute",
+        )
+
+        cutoff = ch.query(MAX_DATE).result_rows[0][0] - timedelta(days=window_days)
         cur = pg_conn.cursor()
         cur.execute(SELECT_SQL, (cutoff,))
         rows = cur.fetchall()
@@ -57,14 +71,6 @@ def load_to_clickhouse(window_days=LOAD_WINDOW_DAYS):
             return
 
         logger.info("Read %d rows from Postgres since %s", len(rows), cutoff)
-
-        ch = clickhouse_connect.get_client(
-            host=os.environ.get("VALUTE_CH_HOST", "localhost"),
-            port=int(os.environ.get("VALUTE_CH_PORT", 8123)),
-            username=os.environ.get("VALUTE_CH_USER", "admin"),
-            password=os.environ.get("VALUTE_CH_PASSWORD", "admin"),
-            database="valute",
-        )
 
         ch.insert("pg_stg_rates", rows, column_names=COLUMNS)
         logger.info("Loaded %d rows into ClickHouse", len(rows))
