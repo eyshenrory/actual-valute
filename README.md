@@ -162,11 +162,9 @@ cd ../valute_dbt_ch && DBT_PROFILES_DIR=. dbt test
 
 ## Пример результата
 
-![USD/RUB](serve/usd_trend.png)
-
 График строится скриптом `serve/plot_rates.py`. По умолчанию валютой является Доллар США. 
 
-![JPY/RUB](serve/jpy_trend.png)
+![USD/RUB](serve/usd_trend.png)
 
 Опционально валюту можно задать переменной окружения:
 
@@ -174,6 +172,7 @@ cd ../valute_dbt_ch && DBT_PROFILES_DIR=. dbt test
 CURRENCY=JPY python3 serve/plot_rates.py
 ```
 
+![JPY/RUB](serve/jpy_trend.png)
 
 ## План выполнения
 
