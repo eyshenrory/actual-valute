@@ -1,32 +1,26 @@
 import matplotlib
 
-matplotlib.use("Agg")  
+matplotlib.use("Agg")
 import os
-from urllib.parse import urlparse
 
+import clickhouse_connect
 import matplotlib.pyplot as plt
-import psycopg2
 
-conn_uri = os.environ["AIRFLOW_CONN_VALUTE_POSTGRES"]
-parsed = urlparse(conn_uri)
-
-conn = psycopg2.connect(
-    host=os.environ.get("VALUTE_DB_HOST", "localhost"),
-    dbname=parsed.path.lstrip("/"),
-    user=parsed.username,
-    password=parsed.password,
-    port=parsed.port or 5432
+client = clickhouse_connect.get_client(
+    host=os.environ.get("VALUTE_CH_HOST", "localhost"),
+    port=int(os.environ.get("VALUTE_CH_PORT", 8123)),
+    username=os.environ.get("VALUTE_CH_USER", "admin"),
+    password=os.environ.get("VALUTE_CH_PASSWORD", "admin"),
+    database="valute",
 )
-cur = conn.cursor()
-with open("serve/trend.sql") as f:
-    char_code = os.environ.get("CURRENCY", "USD")
-    cur.execute(f.read(), (char_code,))
 
-rows = cur.fetchall()
+char_code = os.environ.get("CURRENCY", "USD")
+with open("serve/trend.sql") as f:
+    rows = client.query(f.read(), parameters={"char_code": char_code}).result_rows
+
 dates = [r[0] for r in rows]
 values = [r[1] for r in rows]
-cur.close()
-conn.close()
+client.close()
 
 plt.plot(dates, values)
 plt.title(f"{char_code} / RUB")
